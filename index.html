@@ -25,12 +25,36 @@
 </head>
 <body>
 
-  <!-- ================= AUTHENTICATION CONTAINER ================= -->
-  <div id="auth-page" class="auth-container">
-    <div class="auth-card">
+  <!-- ================= WELCOME / LOGIN TYPE SELECTION ================= -->
+  <div id="welcome-page" class="auth-container">
+    <div class="auth-card welcome-card">
       <div class="auth-header">
         <h1>TransitOps</h1>
         <p>Smart Transport Operations Platform</p>
+      </div>
+      <p class="welcome-subtitle">How would you like to sign in?</p>
+      <div class="login-type-grid">
+        <button type="button" class="login-type-card" onclick="selectLoginType('admin')">
+          <span class="login-type-icon">🛡️</span>
+          <h3>Admin Login</h3>
+          <p>Fleet managers &amp; administrators</p>
+        </button>
+        <button type="button" class="login-type-card" onclick="selectLoginType('user')">
+          <span class="login-type-icon">👤</span>
+          <h3>User Login</h3>
+          <p>Drivers, safety &amp; finance staff</p>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= AUTHENTICATION CONTAINER ================= -->
+  <div id="auth-page" class="auth-container" style="display: none;">
+    <div class="auth-card">
+      <button type="button" class="back-to-welcome" onclick="goBackToWelcome()" title="Back to login selection">← Back</button>
+      <div class="auth-header">
+        <h1>TransitOps</h1>
+        <p id="login-type-label">Admin Login</p>
       </div>
       <form id="login-form" style="display: flex; flex-direction: column; gap: 1rem;">
         <div class="form-group">
@@ -43,13 +67,18 @@
         </div>
         <button type="submit" class="btn btn-primary" style="width: 100%;">Sign In</button>
       </form>
-      <div class="demo-credentials">
+      <div id="admin-demo" class="demo-credentials">
         <strong>Demo Quick Login:</strong>
         <div style="margin-top: 0.5rem;">
-          <button class="demo-user-btn" onclick="quickLogin('admin@transitops.com', 'admin')">Fleet Manager</button>
-          <button class="demo-user-btn" onclick="quickLogin('driver@transitops.com', 'driver')">Driver</button>
-          <button class="demo-user-btn" onclick="quickLogin('safety@transitops.com', 'safety')">Safety Officer</button>
-          <button class="demo-user-btn" onclick="quickLogin('finance@transitops.com', 'finance')">Financial Analyst</button>
+          <button type="button" class="demo-user-btn" onclick="quickLogin('admin@transitops.com', 'admin')">Fleet Manager</button>
+        </div>
+      </div>
+      <div id="user-demo" class="demo-credentials" style="display: none;">
+        <strong>Demo Quick Login:</strong>
+        <div style="margin-top: 0.5rem;">
+          <button type="button" class="demo-user-btn" onclick="quickLogin('driver@transitops.com', 'driver')">Driver</button>
+          <button type="button" class="demo-user-btn" onclick="quickLogin('safety@transitops.com', 'safety')">Safety Officer</button>
+          <button type="button" class="demo-user-btn" onclick="quickLogin('finance@transitops.com', 'finance')">Financial Analyst</button>
         </div>
       </div>
     </div>

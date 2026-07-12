@@ -210,6 +210,86 @@ body {
   color: white;
 }
 
+/* Welcome / Login Type Selection */
+.welcome-card {
+  max-width: 520px;
+}
+
+.welcome-subtitle {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.login-type-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.login-type-card {
+  background: var(--bg-primary);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 1.5rem 1rem;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color var(--transition-speed), background var(--transition-speed), transform 0.1s;
+  font-family: var(--font-family);
+}
+
+.login-type-card:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.login-type-card:active {
+  transform: scale(0.98);
+}
+
+.login-type-icon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.login-type-card h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.35rem;
+}
+
+.login-type-card p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.back-to-welcome {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-family: var(--font-family);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: -0.5rem;
+  transition: color var(--transition-speed);
+}
+
+.back-to-welcome:hover {
+  color: var(--primary);
+}
+
+@media (max-width: 480px) {
+  .login-type-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* App Main Layout */
 .app-container {
   display: flex;
