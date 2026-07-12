@@ -1,7 +1,5 @@
 // ============================================================
 // db.js — TransitOps LocalStorage Database Engine
-// Supports: Vehicles, Drivers, Trips, Expenses, User Profile
-// All data seeded in Indian format (INR, Indian names, RTO)
 // ============================================================
 
 // ─── DEFAULT SEED DATA ───────────────────────────────────────
@@ -15,35 +13,35 @@ const DEFAULT_PROFILE = {
 const DEFAULT_VEHICLES = [
   {
     id: "v-1",
-    regNumber: "KA-05-MA-1024",
+    regNumber: "KA-j1024",
     model: "Tata Ace Gold (Mini Van)",
     capacity: "500 kg",
     status: "Available"
   },
   {
     id: "v-2",
-    regNumber: "KA-03-TC-8899",
+    regNumber: "KA-c8899",
     model: "Ashok Leyland 3520 (Heavy Truck)",
     capacity: "5000 kg",
     status: "Active"
   },
   {
     id: "v-3",
-    regNumber: "KA-01-SP-4433",
+    regNumber: "KA-P4433",
     model: "Mahindra Supro Van",
     capacity: "1200 kg",
     status: "In Shop"
   },
   {
     id: "v-4",
-    regNumber: "MH-14-DK-7721",
+    regNumber: "MH-K7721",
     model: "Tata Ultra 1918 (Heavy Truck)",
     capacity: "3500 kg",
     status: "Available"
   },
   {
     id: "v-5",
-    regNumber: "TN-09-BC-3300",
+    regNumber: "TN-C3300",
     model: "Eicher Pro 3015 (Medium Truck)",
     capacity: "2000 kg",
     status: "Active"
