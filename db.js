@@ -1,4 +1,4 @@
-// db.js - Simulated LocalStorage Database Engine for TransitOps (Part 1 Only)
+// db.js - LocalStorage Database for TransitOps (database part Only)
 
 const DEFAULT_USERS = [
   { id: "u-1", email: "admin@transitops.com", password: "admin", name: "Sarah Connor", role: "Fleet Manager" },
