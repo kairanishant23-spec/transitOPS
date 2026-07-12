@@ -1,0 +1,26 @@
+services:
+  # 1. Host the Vanilla Frontend as a Static Site
+  - type: web
+    name: transitops-frontend
+    env: static
+    buildCommand: ""
+    staticPublishPath: ./
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+  # 2. Host the Node.js / Prisma Backend as a Web Service
+  - type: web
+    name: transitops-api
+    env: node
+    rootDir: server
+    buildCommand: "npm install && npx prisma generate && npx prisma db push"
+    startCommand: "npx tsx src/index.ts"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
