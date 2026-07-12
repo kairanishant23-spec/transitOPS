@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TransitOps — Fleet & Logistics Management</title>
+    <meta
+      name="description"
+      content="TransitOps — logistics and fleet management platform: dashboards, vehicle & driver registry, trip dispatch, and fuel & expense tracking."
+    />
+
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Inter font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Lucide icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <body class="font-sans bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-slate-200 antialiased">
+    <div class="flex min-h-screen">
+      <!-- ============================ SIDEBAR ============================ -->
+      <aside
+        id="sidebar"
+        class="fixed lg:static z-40 flex h-screen w-64 flex-col border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950"
+      >
+        <!-- Logo -->
+        <div class="flex items-center gap-3 border-b border-slate-200 px-6 py-5 dark:border-slate-800">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-600/30">
+            <i data-lucide="truck" class="h-5 w-5"></i>
+          </div>
+          <div>
+            <h1 class="text-lg font-extrabold tracking-tight text-slate-900 dark:text-white">TransitOps</h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Fleet Command</p>
+          </div>
+        </div>
+
+        <!-- User role badge -->
+        <div class="px-4 pt-4">
+          <button id="profileBtn" class="flex w-full items-center gap-3 rounded-xl bg-slate-100 p-3 text-left hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+            <div class="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300">
+              <i data-lucide="user-round" class="h-4 w-4"></i>
+            </div>
+            <div class="min-w-0 flex-1">
+              <p id="profileNameDisplay" class="truncate text-sm font-semibold text-slate-900 dark:text-white">A. Morgan</p>
+              <span id="profileRoleDisplay" class="inline-flex items-center gap-1 rounded-full bg-indigo-600/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300">
+                Financial Analyst / Admin
+              </span>
+            </div>
+          </button>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 space-y-1 px-3 py-4">
+          <button data-view="dashboard" class="nav-link active flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">
+            <i data-lucide="layout-dashboard" class="h-4 w-4"></i> Dashboard
+          </button>
+          <button data-view="registry" class="nav-link flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">
+            <i data-lucide="clipboard-list" class="h-4 w-4"></i> Vehicle &amp; Driver Registry
+          </button>
+          <button data-view="dispatch" class="nav-link flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">
+            <i data-lucide="route" class="h-4 w-4"></i> Trip Dispatch
+          </button>
+          <button data-view="expenses" class="nav-link flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">
+            <i data-lucide="fuel" class="h-4 w-4"></i> Fuel &amp; Expenses
+          </button>
+        </nav>
+
+        <div class="border-t border-slate-200 p-4 dark:border-slate-800">
+          <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+            <span class="pulse-dot h-2 w-2 rounded-full bg-green-500"></span>
+            All systems operational
+          </div>
+        </div>
+      </aside>
+
+      <!-- Mobile sidebar overlay -->
+      <div id="sidebarOverlay" class="fixed inset-0 z-30 hidden bg-black/50 lg:hidden"></div>
+
+      <!-- ============================ MAIN ============================ -->
+      <div class="flex min-h-screen flex-1 flex-col lg:pl-0">
+        <!-- Top header -->
+        <header class="sticky top-0 z-20 flex items-center gap-3 border-b border-slate-200 bg-white/80 px-4 py-3 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80 sm:px-6">
+          <button id="menuBtn" class="rounded-lg p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 lg:hidden">
+            <i data-lucide="menu" class="h-5 w-5"></i>
+          </button>
+
+          <!-- Global search -->
+          <div class="relative flex-1 max-w-xl">
+            <i data-lucide="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"></i>
+            <input
+              id="globalSearch"
+              type="text"
+              placeholder="Search vehicles, drivers, trips…"
+              class="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-10 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
+            />
+          </div>
+
+          <div class="ml-auto flex items-center gap-2">
+            <!-- Notifications Container -->
+            <div class="relative">
+              <button id="notificationBtn" class="relative rounded-lg p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Notifications">
+                <i data-lucide="bell" class="h-5 w-5"></i>
+                <span id="notificationDot" class="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500"></span>
+              </button>
+              <!-- Notifications Dropdown -->
+              <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 rounded-2xl border border-slate-200 bg-white p-4 shadow-xl dark:border-slate-800 dark:bg-slate-950 z-50 transition-all duration-200">
+                <div class="mb-2 flex items-center justify-between border-b border-slate-100 pb-2 dark:border-slate-800">
+                  <h4 class="font-bold text-sm">Notifications</h4>
+                  <button id="clearNotificationsBtn" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">Clear all</button>
+                </div>
+                <ul id="notificationsList" class="max-h-60 overflow-y-auto space-y-2.5 text-xs">
+                  <!-- Dynamic notifications -->
+                </ul>
+              </div>
+            </div>
+
+            <!-- Theme toggle -->
+            <button id="themeToggle" class="rounded-lg p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" aria-label="Toggle dark mode">
+              <i data-lucide="moon" class="hidden h-5 w-5 dark:block"></i>
+              <i data-lucide="sun" class="block h-5 w-5 dark:hidden"></i>
+            </button>
+          </div>
+        </header>
+
+        <main class="flex-1 overflow-x-hidden p-4 sm:p-6">
+          <!-- ==================== VIEW 1: DASHBOARD ==================== -->
+          <section id="view-dashboard" class="view active">
+            <div class="mb-6">
+              <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Analytics Dashboard</h2>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Real-time overview of your fleet operations.</p>
+            </div>
+
+            <!-- KPI cards -->
+            <div class="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
+              <div class="kpi-card rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-800">
+                <div class="mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-green-500/10 text-green-600 dark:text-green-400">
+                  <i data-lucide="circle-check-big" class="h-5 w-5"></i>
+                </div>
+                <p id="stat-active" class="text-2xl font-extrabold text-slate-900 dark:text-white">0</p>
+                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Active Vehicles</p>
+              </div>
+
+              <div class="kpi-card rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-800">
+                <div class="mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400">
+                  <i data-lucide="warehouse" class="h-5 w-5"></i>
+                </div>
+                <p id="stat-available" class="text-2xl font-extrabold text-slate-900 dark:text-white">0</p>
+                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Available Vehicles</p>
+              </div>
+
+              <div class="kpi-card rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-800">
+                <div class="mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                  <i data-lucide="wrench" class="h-5 w-5"></i>
+                </div>
+                <p id="stat-inshop" class="text-2xl font-extrabold text-slate-900 dark:text-white">0</p>
+                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">In Shop</p>
+              </div>
+
+              <div class="kpi-card rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-800">
+                <div class="mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                  <i data-lucide="users" class="h-5 w-5"></i>
+                </div>
+                <p id="stat-drivers" class="text-2xl font-extrabold text-slate-900 dark:text-white">0</p>
+                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Drivers On Duty</p>
+              </div>
+
+              <div class="kpi-card rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-800">
+                <div class="mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-400">
+                  <i data-lucide="gauge" class="h-5 w-5"></i>
+                </div>
+                <p id="stat-utilization" class="text-2xl font-extrabold text-slate-900 dark:text-white">0%</p>
+                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Fleet Utilization</p>
+              </div>
+
+              <div class="kpi-card rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-800">
+                <div class="mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400">
+                  <i data-lucide="indian-rupee" class="h-5 w-5"></i>
+                </div>
+                <p id="stat-cost" class="text-2xl font-extrabold text-slate-900 dark:text-white">₹0</p>
+                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Total Op. Cost</p>
+              </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-800">
+                <h3 class="mb-4 text-sm font-semibold text-slate-900 dark:text-white">Fleet Status Distribution</h3>
+                <div class="chart-wrap">
+                  <canvas id="statusChart"></canvas>
+                </div>
+              </div>
+              <div class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-800">
+                <h3 class="mb-4 text-sm font-semibold text-slate-900 dark:text-white">Operational Cost by Category</h3>
+                <div class="chart-wrap">
+                  <canvas id="costChart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent completed trips table -->
+            <div class="mt-6 rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-800">
+              <div class="flex flex-col gap-3 border-b border-slate-200 p-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
+                <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Recent Completed Trips</h3>
+                <div class="flex items-center gap-2">
+                  <div class="relative">
+                    <i data-lucide="filter" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"></i>
+                    <input id="tripSearch" type="text" placeholder="Filter trips…" class="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900 sm:w-48" />
+                  </div>
+                  <button id="exportCsvBtn" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm shadow-indigo-600/30 hover:bg-indigo-700">
+                    <i data-lucide="download" class="h-4 w-4"></i> Export CSV
+                  </button>
+                </div>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                  <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-900/50 dark:text-slate-400">
+                    <tr>
+                      <th class="px-5 py-3">Trip ID</th>
+                      <th class="px-5 py-3">Route</th>
+                      <th class="px-5 py-3">Vehicle</th>
+                      <th class="px-5 py-3">Driver</th>
+                      <th class="px-5 py-3">Distance</th>
+                      <th class="px-5 py-3">Cost</th>
+                      <th class="px-5 py-3">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tripsTableBody" class="divide-y divide-slate-100 dark:divide-slate-700/60"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- ==================== VIEW 2: REGISTRY ==================== -->
+          <section id="view-registry" class="view">
+            <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Vehicle &amp; Driver Registry</h2>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Manage your fleet assets and personnel.</p>
+              </div>
+            </div>
+
+            <!-- Sub-tabs -->
+            <div class="mb-4 inline-flex rounded-lg border border-slate-200 bg-white p-1 dark:border-slate-800 dark:bg-slate-800">
+              <button data-regtab="vehicles" class="reg-tab active rounded-md px-4 py-1.5 text-sm font-medium">Vehicles</button>
+              <button data-regtab="drivers" class="reg-tab rounded-md px-4 py-1.5 text-sm font-medium text-slate-500 dark:text-slate-400">Drivers</button>
+            </div>
+
+            <!-- Vehicles table -->
+            <div id="regtab-vehicles" class="reg-panel rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-800">
+              <div class="flex items-center justify-between border-b border-slate-200 p-5 dark:border-slate-800">
+                <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Vehicles</h3>
+                <button id="addVehicleBtn" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
+                  <i data-lucide="plus" class="h-4 w-4"></i> Add Vehicle
+                </button>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                  <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-900/50 dark:text-slate-400">
+                    <tr>
+                      <th class="px-5 py-3">Reg Number</th>
+                      <th class="px-5 py-3">Model</th>
+                      <th class="px-5 py-3">Capacity</th>
+                      <th class="px-5 py-3">Status</th>
+                      <th class="px-5 py-3 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="vehiclesTableBody" class="divide-y divide-slate-100 dark:divide-slate-700/60"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Drivers table -->
+            <div id="regtab-drivers" class="reg-panel hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-800">
+              <div class="flex items-center justify-between border-b border-slate-200 p-5 dark:border-slate-800">
+                <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Drivers</h3>
+                <button id="addDriverBtn" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
+                  <i data-lucide="plus" class="h-4 w-4"></i> Add Driver
+                </button>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                  <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-900/50 dark:text-slate-400">
+                    <tr>
+                      <th class="px-5 py-3">Name</th>
+                      <th class="px-5 py-3">License</th>
+                      <th class="px-5 py-3">Expiry</th>
+                      <th class="px-5 py-3">Safety Score</th>
+                      <th class="px-5 py-3">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="driversTableBody" class="divide-y divide-slate-100 dark:divide-slate-700/60"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- ==================== VIEW 3: DISPATCH ==================== -->
+          <section id="view-dispatch" class="view">
+            <div class="mb-6">
+              <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Trip Dispatcher</h2>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Create and assign new trips to your fleet.</p>
+            </div>
+
+            <!-- Lifecycle indicator -->
+            <div class="mb-6 flex flex-wrap items-center gap-2">
+              <div class="step step-active flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-1.5 text-sm font-semibold text-white">
+                <i data-lucide="file-pen" class="h-4 w-4"></i> Draft
+              </div>
+              <i data-lucide="chevron-right" class="h-4 w-4 text-slate-400"></i>
+              <div class="step flex items-center gap-2 rounded-full bg-slate-200 px-4 py-1.5 text-sm font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                <i data-lucide="send" class="h-4 w-4"></i> Dispatched
+              </div>
+              <i data-lucide="chevron-right" class="h-4 w-4 text-slate-400"></i>
+              <div class="step flex items-center gap-2 rounded-full bg-slate-200 px-4 py-1.5 text-sm font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                <i data-lucide="circle-check-big" class="h-4 w-4"></i> Completed
+              </div>
+              <i data-lucide="chevron-right" class="h-4 w-4 text-slate-400"></i>
+              <div class="step flex items-center gap-2 rounded-full bg-slate-200 px-4 py-1.5 text-sm font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                <i data-lucide="circle-x" class="h-4 w-4"></i> Cancelled
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+              <!-- Control panel -->
+              <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-800">
+                <h3 class="mb-5 text-sm font-semibold text-slate-900 dark:text-white">Create New Trip</h3>
+                <form id="dispatchForm" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Vehicle</label>
+                    <select id="dispatch-vehicle" required class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900"></select>
+                  </div>
+                  <div>
+                    <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Driver</label>
+                    <select id="dispatch-driver" required class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900"></select>
+                  </div>
+                  <div>
+                    <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Source</label>
+                    <input id="dispatch-source" type="text" required placeholder="Origin city" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900" />
+                  </div>
+                  <div>
+                    <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Destination</label>
+                    <input id="dispatch-destination" type="text" required placeholder="Destination city" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900" />
+                  </div>
+                  <div>
+                    <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Cargo Weight (kg)</label>
+                    <input id="dispatch-weight" type="number" min="0" placeholder="0" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900" />
+                  </div>
+                  <div>
+                    <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Distance (km)</label>
+                    <input id="dispatch-distance" type="number" min="0" placeholder="0" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900" />
+                  </div>
+                  <div class="sm:col-span-2 flex justify-end gap-2 pt-2">
+                    <button type="reset" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700">Clear</button>
+                    <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
+                      <i data-lucide="send" class="h-4 w-4"></i> Dispatch Trip
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              <!-- Active trips -->
+              <div class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-800">
+                <h3 class="mb-4 text-sm font-semibold text-slate-900 dark:text-white">Active Dispatches</h3>
+                <ul id="activeTripsList" class="space-y-3"></ul>
+              </div>
+            </div>
+          </section>
+
+          <!-- ==================== VIEW 4: EXPENSES ==================== -->
+          <section id="view-expenses" class="view">
+            <div class="mb-6">
+              <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Fuel &amp; Expense Logging</h2>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Track operational spending across your fleet.</p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+              <!-- Log form -->
+              <div class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-800">
+                <h3 class="mb-5 text-sm font-semibold text-slate-900 dark:text-white">Log New Expense</h3>
+                <form id="expenseForm" class="space-y-4">
+                  <div>
+                    <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Vehicle</label>
+                    <select id="expense-vehicle" required class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900"></select>
+                  </div>
+                  <div>
+                    <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Expense Type</label>
+                    <select id="expense-type" required class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900">
+                      <option value="Fuel">Fuel</option>
+                      <option value="Toll">Toll</option>
+                      <option value="Maintenance">Maintenance</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Amount (₹)</label>
+                    <input id="expense-amount" type="number" min="0" step="0.01" required placeholder="0.00" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900" />
+                  </div>
+                  <div>
+                    <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Date</label>
+                    <input id="expense-date" type="date" required class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900" />
+                  </div>
+                  <button type="submit" class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
+                    <i data-lucide="plus" class="h-4 w-4"></i> Log Expense
+                  </button>
+                </form>
+              </div>
+
+              <!-- Expense table -->
+              <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-800">
+                <div class="flex items-center justify-between border-b border-slate-200 p-5 dark:border-slate-800">
+                  <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Logged Expenses</h3>
+                  <div class="text-right">
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Total</p>
+                    <p id="expenseTotal" class="text-lg font-extrabold text-indigo-600 dark:text-indigo-400">₹0.00</p>
+                  </div>
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-900/50 dark:text-slate-400">
+                      <tr>
+                        <th class="px-5 py-3">Vehicle</th>
+                        <th class="px-5 py-3">Type</th>
+                        <th class="px-5 py-3">Amount</th>
+                        <th class="px-5 py-3">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody id="expensesTableBody" class="divide-y divide-slate-100 dark:divide-slate-700/60"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <!-- ============================ MODALS ============================ -->
+    <!-- Add Vehicle -->
+    <dialog id="vehicleModal" class="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-0 text-slate-800 backdrop:bg-black/50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+      <form method="dialog" id="vehicleForm" class="p-6">
+        <div class="mb-4 flex items-center justify-between">
+          <h3 class="text-lg font-bold">Add Vehicle</h3>
+          <button type="button" data-close class="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"><i data-lucide="x" class="h-5 w-5"></i></button>
+        </div>
+        <div class="space-y-3">
+          <input id="v-reg" required placeholder="Reg Number (e.g. TX-4471)" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900" />
+          <input id="v-model" required placeholder="Model (e.g. Volvo FH16)" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900" />
+          <input id="v-capacity" required placeholder="Capacity (e.g. 24t)" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900" />
+          <select id="v-status" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900">
+            <option value="Active">Active</option>
+            <option value="Available">Available</option>
+            <option value="In Shop">In Shop</option>
+          </select>
+        </div>
+        <div class="mt-5 flex justify-end gap-2">
+          <button type="button" data-close class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700">Cancel</button>
+          <button type="submit" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Save Vehicle</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- Add Driver -->
+    <dialog id="driverModal" class="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-0 text-slate-800 backdrop:bg-black/50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+      <form method="dialog" id="driverForm" class="p-6">
+        <div class="mb-4 flex items-center justify-between">
+          <h3 class="text-lg font-bold">Add Driver</h3>
+          <button type="button" data-close class="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"><i data-lucide="x" class="h-5 w-5"></i></button>
+        </div>
+        <div class="space-y-3">
+          <input id="d-name" required placeholder="Full Name" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900" />
+          <input id="d-license" required placeholder="License No." class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900" />
+          <input id="d-expiry" type="date" required class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900" />
+          <input id="d-score" type="number" min="0" max="100" required placeholder="Safety Score (0-100)" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900" />
+          <select id="d-status" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900">
+            <option value="On Duty">On Duty</option>
+            <option value="Off Duty">Off Duty</option>
+          </select>
+        </div>
+        <div class="mt-5 flex justify-end gap-2">
+          <button type="button" data-close class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700">Cancel</button>
+          <button type="submit" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Save Driver</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- User Profile Modal -->
+    <dialog id="profileModal" class="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-0 text-slate-800 backdrop:bg-black/50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+      <form method="dialog" id="profileForm" class="p-6">
+        <div class="mb-4 flex items-center justify-between">
+          <h3 class="text-lg font-bold">User Profile</h3>
+          <button type="button" data-close class="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"><i data-lucide="x" class="h-5 w-5"></i></button>
+        </div>
+        <div class="space-y-4">
+          <div class="flex items-center gap-3 rounded-xl bg-slate-50 p-3 dark:bg-slate-900">
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-600/15 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300">
+              <i data-lucide="user" class="h-6 w-6"></i>
+            </div>
+            <div>
+              <h4 id="modalProfileName" class="font-bold text-base">A. Morgan</h4>
+              <p id="modalProfileRole" class="text-xs text-slate-500 dark:text-slate-400">Financial Analyst / Admin</p>
+            </div>
+          </div>
+          <div>
+            <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Display Name</label>
+            <input id="p-name" required value="A. Morgan" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900" />
+          </div>
+          <div>
+            <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Role Badge</label>
+            <input id="p-role" required value="Financial Analyst / Admin" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900" />
+          </div>
+          <div>
+            <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Email Address</label>
+            <input id="p-email" type="email" required value="a.morgan@transitops.com" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900" />
+          </div>
+        </div>
+        <div class="mt-5 flex justify-end gap-2">
+          <button type="button" data-close class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700">Cancel</button>
+          <button type="submit" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Save Changes</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- Application script -->
+    <script src="app.js"></script>
+  </body>
+</html>
