@@ -49,8 +49,9 @@ router.post("/fuel", authenticate, async (req: Request, res: Response) => {
 // ─── Expenses ───
 const expenseSchema = z.object({
   vehicleId: z.string(),
-  category: z.enum(["Fuel", "Toll", "Maintenance", "Insurance", "Other"]),
+  category: z.string(),
   amount: z.number().min(0),
+  litres: z.number().min(0).optional().default(0),
   date: z.string().transform((s) => new Date(s)).optional(),
 });
 

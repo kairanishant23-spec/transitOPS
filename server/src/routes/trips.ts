@@ -13,6 +13,7 @@ const tripSchema = z.object({
   destination: z.string().min(1),
   cargoWeight: z.number().min(0).default(0),
   distance: z.number().min(0).default(0),
+  revenue: z.number().min(0).default(0),
 });
 
 const completeSchema = z.object({

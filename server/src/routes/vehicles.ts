@@ -9,10 +9,11 @@ const router = Router();
 const vehicleSchema = z.object({
   registrationNumber: z.string().min(2),
   model: z.string().min(1),
-  type: z.enum(["Van", "Truck", "Trailer"]),
+  type: z.string(),
   capacity: z.number().min(0).default(0),
   odometer: z.number().min(0).default(0),
   acquisitionCost: z.number().min(0).default(0),
+  region: z.string().optional().default("Unassigned"),
   status: z.enum(["Available", "On Trip", "In Shop", "Retired"]).default("Available"),
   imageUrl: z.string().url().optional().nullable(),
 });

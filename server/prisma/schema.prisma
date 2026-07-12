@@ -29,6 +29,7 @@ model Vehicle {
   capacity           Float    @default(0) // max load in kg
   odometer           Float    @default(0)
   acquisitionCost    Float    @default(0) @map("acquisition_cost")
+  region             String?  @default("Unassigned")
   status             String   @default("Available") // Available | On Trip | In Shop | Retired
   imageUrl           String?  @map("image_url")
   createdAt          DateTime @default(now()) @map("created_at")
@@ -120,6 +121,7 @@ model Expense {
   vehicleId String   @map("vehicle_id")
   category  String   // Fuel | Toll | Maintenance | Insurance | Other
   amount    Float
+  litres    Float?   @default(0)
   date      DateTime @default(now())
   createdAt DateTime @default(now()) @map("created_at")
 
