@@ -1,4 +1,4 @@
-// db.js - LocalStorage Database for TransitOps (database part Only)
+// db.js - Simulated LocalStorage Database Engine for TransitOps (Part 1 with Images)
 
 const DEFAULT_USERS = [
   { id: "u-1", email: "admin@transitops.com", password: "admin", name: "Sarah Connor", role: "Fleet Manager" },
@@ -8,17 +8,17 @@ const DEFAULT_USERS = [
 ];
 
 const DEFAULT_VEHICLES = [
-  { id: "v-1", registrationNumber: "KA-05-MA-1024", nameModel: "Van-05 (Ford Transit)", type: "Van", maxLoadCapacity: 500, odometer: 12000, acquisitionCost: 25000, status: "Available" },
-  { id: "v-2", registrationNumber: "KA-03-TC-8899", nameModel: "Truck-02 (Volvo FH16)", type: "Truck", maxLoadCapacity: 5000, odometer: 85000, acquisitionCost: 75000, status: "Available" },
-  { id: "v-3", registrationNumber: "KA-01-SP-4433", nameModel: "Mercedes Sprinter", type: "Van", maxLoadCapacity: 1200, odometer: 45000, acquisitionCost: 42000, status: "Available" },
-  { id: "v-4", registrationNumber: "KA-02-RT-0011", nameModel: "Tata Ultra Truck", type: "Truck", maxLoadCapacity: 3500, odometer: 110000, acquisitionCost: 35000, status: "Retired" }
+  { id: "v-1", registrationNumber: "KA-05-MA-1024", nameModel: "Van-05 (Ford Transit)", type: "Van", maxLoadCapacity: 500, odometer: 12000, acquisitionCost: 25000, status: "Available", imageUrl: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=150&auto=format&fit=crop&q=60" },
+  { id: "v-2", registrationNumber: "KA-03-TC-8899", nameModel: "Truck-02 (Volvo FH16)", type: "Truck", maxLoadCapacity: 5000, odometer: 85000, acquisitionCost: 75000, status: "Available", imageUrl: "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=150&auto=format&fit=crop&q=60" },
+  { id: "v-3", registrationNumber: "KA-01-SP-4433", nameModel: "Mercedes Sprinter", type: "Van", maxLoadCapacity: 1200, odometer: 45000, acquisitionCost: 42000, status: "Available", imageUrl: "https://images.unsplash.com/photo-1532581291347-9c39cf10a73c?w=150&auto=format&fit=crop&q=60" },
+  { id: "v-4", registrationNumber: "KA-02-RT-0011", nameModel: "Tata Ultra Truck", type: "Truck", maxLoadCapacity: 3500, odometer: 110000, acquisitionCost: 35000, status: "Retired", imageUrl: "https://images.unsplash.com/photo-1592838064808-04df4dc5f8c6?w=150&auto=format&fit=crop&q=60" }
 ];
 
 const DEFAULT_DRIVERS = [
-  { id: "d-1", name: "Alex", licenseNumber: "DL-552341", licenseCategory: "Class A Commercial", licenseExpiryDate: "2028-12-31", contactNumber: "9876543210", safetyScore: 95, status: "Available" },
-  { id: "d-2", name: "John", licenseNumber: "DL-998822", licenseCategory: "Class B Commercial", licenseExpiryDate: "2027-05-15", contactNumber: "9876543211", safetyScore: 88, status: "Available" },
-  { id: "d-3", name: "Robert", licenseNumber: "DL-443311", licenseCategory: "Standard", licenseExpiryDate: "2029-08-20", contactNumber: "9876543212", safetyScore: 82, status: "Off Duty" },
-  { id: "d-4", name: "Mike (Expired)", licenseNumber: "DL-112233", licenseCategory: "Class A Commercial", licenseExpiryDate: "2025-06-01", contactNumber: "9876543213", safetyScore: 40, status: "Suspended" }
+  { id: "d-1", name: "Alex", licenseNumber: "DL-552341", licenseCategory: "Class A Commercial", licenseExpiryDate: "2028-12-31", contactNumber: "9876543210", safetyScore: 95, status: "Available", imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=60" },
+  { id: "d-2", name: "John", licenseNumber: "DL-998822", licenseCategory: "Class B Commercial", licenseExpiryDate: "2027-05-15", contactNumber: "9876543211", safetyScore: 88, status: "Available", imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&auto=format&fit=crop&q=60" },
+  { id: "d-3", name: "Robert", licenseNumber: "DL-443311", licenseCategory: "Standard", licenseExpiryDate: "2029-08-20", contactNumber: "9876543212", safetyScore: 82, status: "Off Duty", imageUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&auto=format&fit=crop&q=60" },
+  { id: "d-4", name: "Mike (Expired)", licenseNumber: "DL-112233", licenseCategory: "Class A Commercial", licenseExpiryDate: "2025-06-01", contactNumber: "9876543213", safetyScore: 40, status: "Suspended", imageUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&auto=format&fit=crop&q=60" }
 ];
 
 // Initialize Storage
