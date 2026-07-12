@@ -14,6 +14,8 @@
     theme: "transitops_theme",
     profile: "transitops_profile",
     notifications: "transitops_notifications",
+    users: "transitops_users",
+    authUser: "transitops_auth_user",
   };
 
   const load = (key, fallback) => {
@@ -28,6 +30,14 @@
 
   /* -------------------- Seed data (first run only) -------------------- */
   function seed() {
+    if (!localStorage.getItem(KEYS.users)) {
+      save(KEYS.users, [
+        { id: "u-1", email: "admin@transitops.com", password: "admin", name: "Sarah Connor", role: "Fleet Manager" },
+        { id: "u-2", email: "driver@transitops.com", password: "driver", name: "Alex Mercer", role: "Driver" },
+        { id: "u-3", email: "safety@transitops.com", password: "safety", name: "John Doe", role: "Safety Officer" },
+        { id: "u-4", email: "finance@transitops.com", password: "finance", name: "Emma Watson", role: "Financial Analyst" }
+      ]);
+    }
     if (!localStorage.getItem(KEYS.vehicles)) {
       save(KEYS.vehicles, [
         { reg: "TX-4471", model: "Volvo FH16", capacity: "24t", status: "Active" },
@@ -66,6 +76,10 @@
   }
 
   const state = {
+    get users() { return load(KEYS.users, []); },
+    set users(v) { save(KEYS.users, v); },
+    get authUser() { return load(KEYS.authUser, null); },
+    set authUser(v) { save(KEYS.authUser, v); },
     get vehicles() { return load(KEYS.vehicles, []); },
     set vehicles(v) { save(KEYS.vehicles, v); },
     get drivers() { return load(KEYS.drivers, []); },
@@ -74,7 +88,7 @@
     set trips(v) { save(KEYS.trips, v); },
     get expenses() { return load(KEYS.expenses, []); },
     set expenses(v) { save(KEYS.expenses, v); },
-    get profile() { return load(KEYS.profile, { name: "A. Morgan", role: "Financial Analyst / Admin", email: "a.morgan@transitops.com" }); },
+    get profile() { return load(KEYS.profile, { name: "Sarah Connor", role: "Fleet Manager", email: "admin@transitops.com" }); },
     set profile(v) { save(KEYS.profile, v); },
     get notifications() { return load(KEYS.notifications, [
       { text: "System initialized successfully.", time: "Just now" },
@@ -197,6 +211,9 @@
   }
 
   function buildCharts() {
+    if (statusChart) statusChart.destroy();
+    if (costChart) costChart.destroy();
+
     const v = state.vehicles;
     const statusCounts = {
       Active: v.filter((x) => x.status === "Active").length,
@@ -619,6 +636,193 @@
     });
   }
 
+  function initAuth() {
+    const authContainer = $("#authContainer");
+    const appContainer = $("#appContainer");
+    const authForm = $("#authForm");
+    const authAlert = $("#authAlert");
+    const authAlertText = $("#authAlertText");
+    const formRoleIndicator = $("#formRoleIndicator");
+    const authSubmitBtn = $("#authSubmitBtn");
+    
+    const fieldName = $("#fieldSignupName");
+    const fieldRole = $("#fieldSignupRole");
+    
+    const tabAdmin = $("#tabAdmin");
+    const tabUser = $("#tabUser");
+    const tabSignup = $("#tabSignup");
+    
+    let currentTab = "admin";
+    
+    // Switch tabs helper
+    function setTab(tab) {
+      currentTab = tab;
+      authAlert.classList.add("hidden");
+      
+      // Update Tab Styles
+      [tabAdmin, tabUser, tabSignup].forEach(t => {
+        t.classList.remove("text-indigo-400", "border-b-2", "border-indigo-500");
+        t.classList.add("text-slate-400", "hover:text-slate-200");
+      });
+      
+      if (tab === "admin") {
+        tabAdmin.classList.add("text-indigo-400", "border-b-2", "border-indigo-500");
+        tabAdmin.classList.remove("text-slate-400", "hover:text-slate-200");
+        
+        fieldName.classList.add("hidden");
+        fieldRole.classList.add("hidden");
+        formRoleIndicator.innerHTML = `<i data-lucide="shield-check" class="h-4 w-4"></i> Managing Administrator Account`;
+        authSubmitBtn.textContent = "Log In as Admin";
+        
+        $("#authEmail").value = "admin@transitops.com";
+        $("#authPassword").value = "admin";
+      } else if (tab === "user") {
+        tabUser.classList.add("text-indigo-400", "border-b-2", "border-indigo-500");
+        tabUser.classList.remove("text-slate-400", "hover:text-slate-200");
+        
+        fieldName.classList.add("hidden");
+        fieldRole.classList.add("hidden");
+        formRoleIndicator.innerHTML = `<i data-lucide="users" class="h-4 w-4"></i> Standard Staff & Driver Login`;
+        authSubmitBtn.textContent = "Log In as Staff/Driver";
+        
+        $("#authEmail").value = "driver@transitops.com";
+        $("#authPassword").value = "driver";
+      } else if (tab === "signup") {
+        tabSignup.classList.add("text-indigo-400", "border-b-2", "border-indigo-500");
+        tabSignup.classList.remove("text-slate-400", "hover:text-slate-200");
+        
+        fieldName.classList.remove("hidden");
+        fieldRole.classList.remove("hidden");
+        formRoleIndicator.innerHTML = `<i data-lucide="user-plus" class="h-4 w-4"></i> Register New Staff Credentials`;
+        authSubmitBtn.textContent = "Register & Account Created";
+        
+        $("#authName").value = "";
+        $("#authEmail").value = "";
+        $("#authPassword").value = "";
+        $("#authRole").value = "Driver";
+      }
+      refreshIcons();
+    }
+    
+    // Tab event listeners
+    tabAdmin.addEventListener("click", () => setTab("admin"));
+    tabUser.addEventListener("click", () => setTab("user"));
+    tabSignup.addEventListener("click", () => setTab("signup"));
+    
+    // Submit Auth Form
+    authForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      authAlert.classList.add("hidden");
+      
+      const email = $("#authEmail").value.trim().toLowerCase();
+      const password = $("#authPassword").value;
+      
+      if (currentTab === "signup") {
+        const name = $("#authName").value.trim();
+        const role = $("#authRole").value;
+        if (!name) {
+          authAlertText.textContent = "Full name is required.";
+          authAlert.classList.remove("hidden");
+          return;
+        }
+        
+        const users = state.users;
+        if (users.some(u => u.email.toLowerCase() === email)) {
+          authAlertText.textContent = "This email is already registered.";
+          authAlert.classList.remove("hidden");
+          return;
+        }
+        
+        const newUser = { id: "u-" + Date.now(), email, password, name, role };
+        users.push(newUser);
+        state.users = users;
+        
+        state.authUser = newUser;
+        state.profile = { name, role, email };
+        
+        // Go to app
+        loginSuccess();
+      } else {
+        // Login flow
+        const user = state.users.find(u => u.email.toLowerCase() === email && u.password === password);
+        if (!user) {
+          authAlertText.textContent = "Invalid email or password.";
+          authAlert.classList.remove("hidden");
+          return;
+        }
+        
+        // Enforce Admin / Fleet Manager role on the admin tab
+        if (currentTab === "admin" && user.role !== "Fleet Manager") {
+          authAlertText.textContent = "Access denied: Account does not have administrator privileges.";
+          authAlert.classList.remove("hidden");
+          return;
+        }
+        
+        // Enforce non-admin roles on the Staff Login tab
+        if (currentTab === "user" && user.role === "Fleet Manager") {
+          authAlertText.textContent = "Please use the Admin Login tab for administrator accounts.";
+          authAlert.classList.remove("hidden");
+          return;
+        }
+        
+        state.authUser = user;
+        state.profile = { name: user.name, role: user.role, email: user.email };
+        
+        loginSuccess();
+      }
+    });
+    
+    // Demo Login buttons
+    $$(".demo-login-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const email = btn.dataset.email;
+        const password = btn.dataset.password;
+        const type = btn.dataset.type;
+        
+        setTab(type);
+        $("#authEmail").value = email;
+        $("#authPassword").value = password;
+        
+        // Dispatch form submit
+        authForm.dispatchEvent(new Event("submit"));
+      });
+    });
+    
+    // Logout Action
+    $("#logoutBtn").addEventListener("click", () => {
+      state.authUser = null;
+      logoutSuccess();
+    });
+    
+    function loginSuccess() {
+      // Refresh Profile UI
+      initProfile();
+      // Render components
+      renderAll();
+      // Build charts
+      buildCharts();
+      
+      authContainer.classList.add("hidden");
+      appContainer.classList.remove("hidden");
+      
+      addNotification(`Welcome back, ${state.profile.name}!`);
+      refreshIcons();
+    }
+    
+    function logoutSuccess() {
+      appContainer.classList.add("hidden");
+      authContainer.classList.remove("hidden");
+      setTab("admin");
+    }
+    
+    // Check initial auth state
+    if (state.authUser) {
+      loginSuccess();
+    } else {
+      logoutSuccess();
+    }
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     seed();
     initTheme();
@@ -629,8 +833,7 @@
     initListeners();
     initNotifications();
     initProfile();
-    buildCharts();
-    renderAll();
+    initAuth();
     refreshIcons();
   });
 })();

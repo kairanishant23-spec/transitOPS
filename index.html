@@ -42,7 +42,126 @@
   </head>
 
   <body class="font-sans bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-slate-200 antialiased">
-    <div class="flex min-h-screen">
+    <!-- ============================ AUTHENTICATION SCREEN ============================ -->
+    <div id="authContainer" class="flex min-h-screen items-center justify-center bg-slate-950 text-slate-100 relative overflow-hidden w-full">
+      <!-- Animated Background Blobs -->
+      <div class="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-indigo-600/20 blur-3xl"></div>
+      <div class="absolute -right-20 -bottom-20 h-80 w-80 rounded-full bg-violet-600/20 blur-3xl"></div>
+      <div class="absolute left-1/3 top-1/2 h-60 w-60 -translate-y-1/2 rounded-full bg-emerald-600/10 blur-3xl"></div>
+      
+      <!-- Card Container -->
+      <div class="relative z-10 w-full max-w-md p-4">
+        <div class="overflow-hidden rounded-3xl border border-slate-800/80 bg-slate-950/60 shadow-2xl backdrop-blur-xl">
+          <!-- Logo & Header -->
+          <div class="border-b border-slate-900 px-8 pt-8 pb-6 text-center">
+            <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-600/40">
+              <i data-lucide="truck" class="h-6 w-6"></i>
+            </div>
+            <h2 class="text-2xl font-extrabold tracking-tight text-white">TransitOps</h2>
+            <p class="text-xs text-slate-400 mt-1">Fleet Command & Logistics Portal</p>
+          </div>
+          
+          <!-- Auth Tabs -->
+          <div class="flex border-b border-slate-900 bg-slate-950/30 p-1">
+            <button id="tabAdmin" type="button" class="flex-1 py-3 text-center text-sm font-semibold text-indigo-400 border-b-2 border-indigo-500 focus:outline-none transition-all duration-150">
+              Admin Login
+            </button>
+            <button id="tabUser" type="button" class="flex-1 py-3 text-center text-sm font-semibold text-slate-400 hover:text-slate-200 focus:outline-none transition-all duration-150">
+              Staff Login
+            </button>
+            <button id="tabSignup" type="button" class="flex-1 py-3 text-center text-sm font-semibold text-slate-400 hover:text-slate-200 focus:outline-none transition-all duration-150">
+              Sign Up
+            </button>
+          </div>
+          
+          <div class="p-8">
+            <!-- Alert message area -->
+            <div id="authAlert" class="hidden mb-4 rounded-xl bg-rose-500/10 p-3 text-xs font-medium text-rose-400 border border-rose-500/20 flex items-center gap-2">
+              <i data-lucide="alert-triangle" class="h-4 w-4 shrink-0"></i>
+              <span id="authAlertText">Invalid credentials.</span>
+            </div>
+
+            <!-- Login Form (Dynamic for Admin and User) -->
+            <form id="authForm" class="space-y-4">
+              <!-- Admin vs User indicator text -->
+              <div id="formRoleIndicator" class="text-xs text-indigo-300 font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <i data-lucide="shield-check" class="h-4 w-4"></i> Managing Administrator Account
+              </div>
+
+              <!-- Name Field (Hidden for Login, Shown for Signup) -->
+              <div id="fieldSignupName" class="hidden">
+                <label class="mb-1 block text-xs font-semibold text-slate-400">Full Name</label>
+                <div class="relative">
+                  <i data-lucide="user" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500"></i>
+                  <input id="authName" type="text" placeholder="John Doe" class="w-full rounded-xl border border-slate-800 bg-slate-900/50 py-2.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-600 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all" />
+                </div>
+              </div>
+
+              <div>
+                <label class="mb-1 block text-xs font-semibold text-slate-400">Email Address</label>
+                <div class="relative">
+                  <i data-lucide="mail" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500"></i>
+                  <input id="authEmail" type="email" required placeholder="admin@transitops.com" class="w-full rounded-xl border border-slate-800 bg-slate-900/50 py-2.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-600 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all" />
+                </div>
+              </div>
+
+              <div>
+                <label class="mb-1 block text-xs font-semibold text-slate-400">Password</label>
+                <div class="relative">
+                  <i data-lucide="lock" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500"></i>
+                  <input id="authPassword" type="password" required placeholder="••••••••" class="w-full rounded-xl border border-slate-800 bg-slate-900/50 py-2.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-600 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all" />
+                </div>
+              </div>
+
+              <!-- Role Selector (Only for Signup) -->
+              <div id="fieldSignupRole" class="hidden">
+                <label class="mb-1 block text-xs font-semibold text-slate-400">Select Role</label>
+                <div class="relative">
+                  <i data-lucide="briefcase" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500"></i>
+                  <select id="authRole" class="w-full rounded-xl border border-slate-800 bg-slate-900/50 py-2.5 pl-10 pr-4 text-sm text-slate-100 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all appearance-none">
+                    <option value="Fleet Manager">Fleet Manager (Admin)</option>
+                    <option value="Driver">Driver</option>
+                    <option value="Safety Officer">Safety Officer</option>
+                    <option value="Financial Analyst">Financial Analyst</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Submit Button -->
+              <button id="authSubmitBtn" type="submit" class="mt-2 w-full rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 hover:from-indigo-500 hover:to-violet-500 transition-all transform active:scale-[0.98]">
+                Log In as Admin
+              </button>
+            </form>
+
+            <!-- Quick Access / Testing Helpers -->
+            <div id="demoHelperSection" class="mt-6 border-t border-slate-900 pt-6">
+              <p class="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-3 text-center">Quick Demo Accounts</p>
+              <div id="demoGrid" class="grid grid-cols-2 gap-2">
+                <button type="button" class="demo-login-btn rounded-xl border border-slate-900 bg-slate-950/40 p-2 text-left hover:bg-slate-900/50 transition-colors" data-email="admin@transitops.com" data-password="admin" data-type="admin">
+                  <div class="text-[10px] font-bold text-indigo-400">Sarah (Admin)</div>
+                  <div class="text-[9px] text-slate-500 truncate">admin@transitops.com</div>
+                </button>
+                <button type="button" class="demo-login-btn rounded-xl border border-slate-900 bg-slate-950/40 p-2 text-left hover:bg-slate-900/50 transition-colors" data-email="driver@transitops.com" data-password="driver" data-type="user">
+                  <div class="text-[10px] font-bold text-emerald-400">Alex (Driver)</div>
+                  <div class="text-[9px] text-slate-500 truncate">driver@transitops.com</div>
+                </button>
+                <button type="button" class="demo-login-btn rounded-xl border border-slate-900 bg-slate-950/40 p-2 text-left hover:bg-slate-900/50 transition-colors" data-email="finance@transitops.com" data-password="finance" data-type="user">
+                  <div class="text-[10px] font-bold text-amber-400">Emma (Finance)</div>
+                  <div class="text-[9px] text-slate-500 truncate">finance@transitops.com</div>
+                </button>
+                <button type="button" class="demo-login-btn rounded-xl border border-slate-900 bg-slate-950/40 p-2 text-left hover:bg-slate-900/50 transition-colors" data-email="safety@transitops.com" data-password="safety" data-type="user">
+                  <div class="text-[10px] font-bold text-sky-400">John (Safety)</div>
+                  <div class="text-[9px] text-slate-500 truncate">safety@transitops.com</div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- App Container -->
+    <div id="appContainer" class="flex min-h-screen hidden">
       <!-- ============================ SIDEBAR ============================ -->
       <aside
         id="sidebar"
@@ -90,7 +209,10 @@
           </button>
         </nav>
 
-        <div class="border-t border-slate-200 p-4 dark:border-slate-800">
+        <div class="border-t border-slate-200 p-4 dark:border-slate-800 flex flex-col gap-2">
+          <button id="logoutBtn" class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-500/10 dark:text-rose-400 dark:hover:bg-rose-500/20 transition-colors duration-150">
+            <i data-lucide="log-out" class="h-4 w-4"></i> Log Out
+          </button>
           <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
             <span class="pulse-dot h-2 w-2 rounded-full bg-green-500"></span>
             All systems operational
